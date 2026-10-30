@@ -58,7 +58,22 @@ app.get('/books',async(req,res)=>{
     
 });
 
-//Start BookNook servermkdir src
+app.post('/books',async(req,res)=>{
+
+try{
+   const result = await books.insertOne(req.body)
+    res.status(201).send({
+        message:"Book added successfully",
+        result
+    }) 
+} catch(error){
+    console.dir(error)
+    res.status(500).send("Failed to add book")
+}
+    
+})
+
+//Start BookNook server
 
 app.listen(port,()=>{
     console.log(`BookNook server is running on port ${port}`);
