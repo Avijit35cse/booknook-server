@@ -42,6 +42,22 @@ app.get('/',(req,res)=>{
     res.send("BookNook server is running!")
 })
 
+//Get all books
+app.get('/books',async(req,res)=>{
+
+    try{
+        const allBooks = await books.find({}).toArray();
+        res.send(allBooks);
+    }
+    catch(error){
+        console.dir(error);
+        res.status(500).send({
+            message: "Failed to fetch books"
+        })
+    }
+    
+});
+
 //Start BookNook servermkdir src
 
 app.listen(port,()=>{
