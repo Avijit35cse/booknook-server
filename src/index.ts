@@ -136,6 +136,35 @@ app.get('/',(req,res)=>{
         }
     })
 
+//Single book api
+
+    app.get('/books/:id',async(req,res)=>{
+        try{
+            const id = req.params.id
+            if(!ObjectId.isValid(id)){
+                return res.status(400).send({
+                    message : "Invalid book ID"
+                })               
+            }
+            const bookId = new ObjectId(id) 
+                const result = await books.findOne({_id: bookId}) 
+            
+                if(!result){
+                    return res.status(404).send({
+                        message :"Book not found"
+                    })
+                }
+                res.send({
+                    message : "Book fetched successfully",
+                    result
+                })
+
+        } catch(error){
+            console.dir(error)
+            res.status(500).send("Failed to fetch book")
+        }
+    })
+
 //Start BookNook server
 
 app.listen(port,()=>{
