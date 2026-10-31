@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 
 const app = express()
 const port = process.env.PORT || 5000
@@ -58,6 +58,8 @@ app.get('/books',async(req,res)=>{
     
 });
 
+//Add Books
+
 app.post('/books',async(req,res)=>{
 
 try{
@@ -70,6 +72,39 @@ try{
     console.dir(error)
     res.status(500).send("Failed to add book")
 }
+    
+})
+
+//Update books
+
+app.patch('/books/:id',async(req,res)=>{
+    try{
+        const id = req.params.id
+        
+        if(!ObjectId.isValid(id)){
+            return res.status(400).send({
+                message : "Invalid book ID"
+            })
+        }
+
+        const bookId = new ObjectId(id)
+
+        const result = await books.updateOne(
+            {_id: bookId},{ $set: req.body}
+        )
+
+        if(result.matchedCount === 0){
+            return res.status(404).send({
+                message : "Book not found"
+            })
+        }
+        res.send({
+            message : "Book updated successfully",result
+        })
+    } catch(error){
+        console.dir(error);
+        res.status(500).send("Failed to update book")
+    }
     
 })
 

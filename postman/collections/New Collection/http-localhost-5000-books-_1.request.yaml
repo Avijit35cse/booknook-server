@@ -1,0 +1,19 @@
+$kind: http-request
+name: http://localhost:5000/books/_1
+description: ""
+url: http://localhost:5000/books/_1
+method: PATCH
+body:
+  type: json
+  content: "{\r
+
+    \  \"_id\": \"6ae528b892337157ab321e04\",\r
+
+    \  \"title\": \"JavaScript Basics\",\r
+
+    \  \"author\": \"David\",\r
+
+    \  \"category\": \"Science\"\r
+
+    }"
+order: 1000
