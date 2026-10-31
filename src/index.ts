@@ -113,6 +113,50 @@ app.get('/',(req,res)=>{
 app.post('/borrows',async(req,res)=>{
     try{
 
+        const {bookId} = req.body
+
+        if(!ObjectId.isValid(bookId)){
+            return res.status(400).send({
+                message : "Invalid book ID"
+            })
+        }
+
+        const book = await books.findOne({
+            _id : new ObjectId(bookId)
+        })
+
+        if(!book){
+            return res.status(404).send({
+                message : "Book not found"
+            })
+        }
+
+        const alreadyBorrowed = await borrows.findOne({
+            bookId,
+            userEmail : req.body.userEmail
+        })
+
+        if(alreadyBorrowed){
+            return res.status(400).send({
+                message : "You have already borrowed this book"
+            })
+        }
+
+        if(book.availableCopies <= 0){
+            return res.status(400).send({
+                message : "No copies avaliable"
+            })
+        }
+
+        await books.updateOne(
+            {_id: new ObjectId(bookId)},
+            {
+                $inc : {
+                    availableCopies : -1
+                }
+            }
+        )
+
         const result = await borrows.insertOne(req.body) 
         res.status(201).send({
             message : "Borrow book successfully"
@@ -138,6 +182,57 @@ app.get('/borrows',async(req,res)=>{
         console.dir(error)
         res.status(500).send({
             message: "Failed to fetch borrow records"
+        })
+    }
+})
+
+//Return borrow book
+
+app.delete('/borrows/:id',async(req,res)=>{
+    try{
+        const id = req.params.id
+
+        if(!ObjectId.isValid(id)){
+            return res.status(400).send({
+                message : "Invalid borrow ID"
+            })
+        }
+        const borrow = await borrows.findOne({
+            _id : new ObjectId(id)
+        })
+
+        if(!borrow){
+            return res.status(404).send({
+                message : "Borrow record not found"
+            })
+        }
+
+        
+        const bookId = new ObjectId(borrow.bookId)
+        const availableCopies = await books.updateOne({ _id : bookId},{ 
+            $inc :{availableCopies : 1
+
+            }
+        })
+
+       
+        if(availableCopies.matchedCount === 0){
+            return res.status(404).send({
+                message : "Book not found"
+            })
+        }
+
+         await borrows.deleteOne({
+            _id : new ObjectId(id)
+        })
+        res.send({
+            message : "Book returned successfully"
+        })
+
+    } catch(error){
+        console.dir(error)
+        res.status(500).send({
+            message : "Failed to return borrow book"
         })
     }
 })
