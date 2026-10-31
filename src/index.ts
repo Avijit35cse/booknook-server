@@ -88,6 +88,7 @@ app.get('/',(req,res)=>{
         }
     })
 
+
 //Add Book
 
     app.post('/books',async(req,res)=>{
@@ -121,6 +122,22 @@ app.post('/borrows',async(req,res)=>{
         console.dir(error)
         res.status(500).send({
             message: "Failed to borrow book"
+        })
+    }
+})
+
+
+// Get borrow book
+
+app.get('/borrows',async(req,res)=>{
+    try{
+        const allBorrows = await borrows.find({}).toArray()
+        res.send(allBorrows)
+
+    } catch(error){
+        console.dir(error)
+        res.status(500).send({
+            message: "Failed to fetch borrow records"
         })
     }
 })
