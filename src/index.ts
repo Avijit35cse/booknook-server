@@ -34,6 +34,7 @@ const db = connectedClient.db("booknookDB");
 
 //Select the Books collection
 const books = db.collection("books");
+const borrows = db.collection("borrows")
 
 
 //Test route of server
@@ -58,6 +59,35 @@ app.get('/',(req,res)=>{
         
     });
 
+//Single book api
+
+    app.get('/books/:id',async(req,res)=>{
+        try{
+            const id = req.params.id
+            if(!ObjectId.isValid(id)){
+                return res.status(400).send({
+                    message : "Invalid book ID"
+                })               
+            }
+            const bookId = new ObjectId(id) 
+                const result = await books.findOne({_id: bookId}) 
+            
+                if(!result){
+                    return res.status(404).send({
+                        message :"Book not found"
+                    })
+                }
+                res.send({
+                    message : "Book fetched successfully",
+                    result
+                })
+
+        } catch(error){
+            console.dir(error)
+            res.status(500).send("Failed to fetch book")
+        }
+    })
+
 //Add Book
 
     app.post('/books',async(req,res)=>{
@@ -70,10 +100,30 @@ app.get('/',(req,res)=>{
         }) 
     } catch(error){
         console.dir(error)
-        res.status(500).send("Failed to add book")
+        res.status(500).send({
+            message : "Failed to add book"
+        })
     }
         
     })
+
+// Borrow book
+
+app.post('/borrows',async(req,res)=>{
+    try{
+
+        const result = await borrows.insertOne(req.body) 
+        res.status(201).send({
+            message : "Borrow book successfully"
+        })
+
+    } catch(error){
+        console.dir(error)
+        res.status(500).send({
+            message: "Failed to borrow book"
+        })
+    }
+})
 
 //Update book
 
@@ -133,35 +183,6 @@ app.get('/',(req,res)=>{
         } catch(error){
             console.dir(error);
             res.status(500).send("Failed to delete book")
-        }
-    })
-
-//Single book api
-
-    app.get('/books/:id',async(req,res)=>{
-        try{
-            const id = req.params.id
-            if(!ObjectId.isValid(id)){
-                return res.status(400).send({
-                    message : "Invalid book ID"
-                })               
-            }
-            const bookId = new ObjectId(id) 
-                const result = await books.findOne({_id: bookId}) 
-            
-                if(!result){
-                    return res.status(404).send({
-                        message :"Book not found"
-                    })
-                }
-                res.send({
-                    message : "Book fetched successfully",
-                    result
-                })
-
-        } catch(error){
-            console.dir(error)
-            res.status(500).send("Failed to fetch book")
         }
     })
 
