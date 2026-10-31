@@ -1,36 +1,19 @@
 import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
-import { MongoClient, ObjectId } from 'mongodb';
+import { db } from './lib/db.js';
+import { ObjectId } from 'mongodb';
+import { toNodeHandler } from 'better-auth/node';
+import { auth } from './lib/auth.js';
 
 const app = express()
 const port = process.env.PORT || 5000
 
 //middlewares
 app.use(cors())
+app.all("/api/auth/*splat", toNodeHandler(auth));
 app.use(express.json())
 
-//MongoDB connection
-
-const client = new MongoClient(process.env.MONGODB_URI!);
-
-export async function connectToMongoDB() {
-  try {
-    await client.connect();
-    console.log("You successfully connected to MongoDB!");
-    return client;
-  } catch (err) {
-    console.dir(err);
-    process.exit(1);
-  }
-}
-
-
-//Connect to MongoDB
-const connectedClient = await connectToMongoDB();
-
-//Select the BookNook Database
-const db = connectedClient.db("booknookDB");
 
 //Select the Books collection
 const books = db.collection("books");
