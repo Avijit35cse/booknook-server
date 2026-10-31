@@ -43,70 +43,98 @@ app.get('/',(req,res)=>{
 })
 
 //Get all books
-app.get('/books',async(req,res)=>{
+    app.get('/books',async(req,res)=>{
 
-    try{
-        const allBooks = await books.find({}).toArray();
-        res.send(allBooks);
-    }
-    catch(error){
-        console.dir(error);
-        res.status(500).send({
-            message: "Failed to fetch books"
-        })
-    }
-    
-});
-
-//Add Books
-
-app.post('/books',async(req,res)=>{
-
-try{
-   const result = await books.insertOne(req.body)
-    res.status(201).send({
-        message:"Book added successfully",
-        result
-    }) 
-} catch(error){
-    console.dir(error)
-    res.status(500).send("Failed to add book")
-}
-    
-})
-
-//Update books
-
-app.patch('/books/:id',async(req,res)=>{
-    try{
-        const id = req.params.id
+        try{
+            const allBooks = await books.find({}).toArray();
+            res.send(allBooks);
+        }
+        catch(error){
+            console.dir(error);
+            res.status(500).send({
+                message: "Failed to fetch books"
+            })
+        }
         
-        if(!ObjectId.isValid(id)){
-            return res.status(400).send({
-                message : "Invalid book ID"
-            })
-        }
+    });
 
-        const bookId = new ObjectId(id)
+//Add Book
 
-        const result = await books.updateOne(
-            {_id: bookId},{ $set: req.body}
-        )
+    app.post('/books',async(req,res)=>{
 
-        if(result.matchedCount === 0){
-            return res.status(404).send({
-                message : "Book not found"
-            })
-        }
-        res.send({
-            message : "Book updated successfully",result
-        })
+    try{
+    const result = await books.insertOne(req.body)
+        res.status(201).send({
+            message:"Book added successfully",
+            result
+        }) 
     } catch(error){
-        console.dir(error);
-        res.status(500).send("Failed to update book")
+        console.dir(error)
+        res.status(500).send("Failed to add book")
     }
-    
-})
+        
+    })
+
+//Update book
+
+    app.patch('/books/:id',async(req,res)=>{
+        try{
+            const id = req.params.id
+            
+            if(!ObjectId.isValid(id)){
+                return res.status(400).send({
+                    message : "Invalid book ID"
+                })
+            }
+
+            const bookId = new ObjectId(id)
+
+            const result = await books.updateOne(
+                {_id: bookId},{ $set: req.body}
+            )
+
+            if(result.matchedCount === 0){
+                return res.status(404).send({
+                    message : "Book not found"
+                })
+            }
+            res.send({
+                message : "Book updated successfully",result
+            })
+        } catch(error){
+            console.dir(error);
+            res.status(500).send("Failed to update book")
+        }
+        
+    })
+
+//Delete book
+
+    app.delete('/books/:id',async(req,res)=>{
+        try{
+            const id = req.params.id
+            
+            if(!ObjectId.isValid(id)){
+                return res.status(400).send({
+                    message : "Invalid book ID"
+                })         
+            }
+            const bookId = new ObjectId(id)
+                const result = await books.deleteOne({_id: bookId})
+                if(result.deletedCount === 0){
+                return res.status(404).send({
+                    message : "Book not found"
+                })
+            }
+            res.status(200).send({
+                message : "Book deleted successfully",result
+            })
+
+        } catch(error){
+            console.dir(error);
+            res.status(500).send("Failed to delete book")
+        }
+    })
 
 //Start BookNook server
 
