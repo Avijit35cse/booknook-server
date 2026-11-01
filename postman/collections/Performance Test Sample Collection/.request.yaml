@@ -1,0 +1,13 @@
+$kind: http-request
+name: ""
+url: http://localhost:5000/api/auth/sign-out?origin=http://localhost:3000
+method: POST
+queryParams:
+  - key: origin
+    value: http://localhost:3000
+    disabled: false
+    description: ""
+body:
+  type: json
+  content: ""
+order: 1000
