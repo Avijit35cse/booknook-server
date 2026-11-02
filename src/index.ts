@@ -161,7 +161,11 @@ app.post('/borrows',async(req,res)=>{
 
 app.get('/borrows',async(req,res)=>{
     try{
-        const allBorrows = await borrows.find({}).toArray()
+        const userEmail = req.query.userEmail as string
+        const allBorrows = await borrows.find({
+            userEmail : userEmail
+        }).toArray()
+        
         res.send(allBorrows)
 
     } catch(error){
@@ -285,6 +289,8 @@ app.delete('/borrows/:id',async(req,res)=>{
     })
 
 //Start BookNook server
+
+const authContext = await auth.$context;
 
 app.listen(port,()=>{
     console.log(`BookNook server is running on port ${port}`);
