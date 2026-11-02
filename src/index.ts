@@ -25,130 +25,133 @@ const borrows = db.collection("borrows")
 
 //Test route of server
 
-app.get('/',(req,res)=>{
+app.get('/', (req, res) => {
     res.send("BookNook server is running!")
 })
 
-//Get all books
-    app.get('/books',async(req,res)=>{
+//Get books by user email
 
-        try{
-            const allBooks = await books.find({}).toArray();
-            res.send(allBooks);
-        }
-        catch(error){
-            console.dir(error);
-            res.status(500).send({
-                message: "Failed to fetch books"
-            })
-        }
-        
-    });
+app.get('/books', async (req, res) => {
+    try {
+        const addedBy = req.query.addedBy as string;
+
+        const allBooks = await books.find({
+            addedBy: addedBy
+        }).toArray();
+
+        res.send(allBooks);
+    } catch (error) {
+        console.dir(error);
+        res.status(500).send({
+            message: "Failed to fetch books"
+        });
+    }
+});
 
 //Single book api
 
-    app.get('/books/:id',async(req,res)=>{
-        try{
-            const id = req.params.id
-            if(!ObjectId.isValid(id)){
-                return res.status(400).send({
-                    message : "Invalid book ID"
-                })               
-            }
-            const bookId = new ObjectId(id) 
-                const result = await books.findOne({_id: bookId}) 
-            
-                if(!result){
-                    return res.status(404).send({
-                        message :"Book not found"
-                    })
-                }
-                res.send({
-                    message : "Book fetched successfully",
-                    result
-                })
-
-        } catch(error){
-            console.dir(error)
-            res.status(500).send("Failed to fetch book")
+app.get('/books/:id', async (req, res) => {
+    try {
+        const id = req.params.id
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).send({
+                message: "Invalid book ID"
+            })
         }
-    })
+        const bookId = new ObjectId(id)
+        const result = await books.findOne({ _id: bookId })
+
+        if (!result) {
+            return res.status(404).send({
+                message: "Book not found"
+            })
+        }
+        res.send({
+            message: "Book fetched successfully",
+            result
+        })
+
+    } catch (error) {
+        console.dir(error)
+        res.status(500).send("Failed to fetch book")
+    }
+})
 
 
 //Add Book
 
-    app.post('/books',async(req,res)=>{
+app.post('/books', async (req, res) => {
 
-    try{
-    const result = await books.insertOne(req.body)
+    try {
+        const result = await books.insertOne(req.body)
         res.status(201).send({
-            message:"Book added successfully",
+            message: "Book added successfully",
             result
-        }) 
-    } catch(error){
+        })
+    } catch (error) {
         console.dir(error)
         res.status(500).send({
-            message : "Failed to add book"
+            message: "Failed to add book"
         })
     }
-        
-    })
+
+})
 
 // Borrow book
 
-app.post('/borrows',async(req,res)=>{
-    try{
+app.post('/borrows', async (req, res) => {
+    try {
 
-        const {bookId} = req.body
+        const { bookId } = req.body
 
-        if(!ObjectId.isValid(bookId)){
+        if (!ObjectId.isValid(bookId)) {
             return res.status(400).send({
-                message : "Invalid book ID"
+                message: "Invalid book ID"
             })
         }
 
         const book = await books.findOne({
-            _id : new ObjectId(bookId)
+            _id: new ObjectId(bookId)
         })
 
-        if(!book){
+        if (!book) {
             return res.status(404).send({
-                message : "Book not found"
+                message: "Book not found"
             })
         }
 
         const alreadyBorrowed = await borrows.findOne({
             bookId,
-            userEmail : req.body.userEmail
+            userEmail: req.body.userEmail
         })
 
-        if(alreadyBorrowed){
+        if (alreadyBorrowed) {
             return res.status(400).send({
-                message : "You have already borrowed this book"
+                message: "You have already borrowed this book"
             })
         }
 
-        if(book.availableCopies <= 0){
+        if (book.availableCopies <= 0) {
             return res.status(400).send({
-                message : "No copies avaliable"
+                message: "No copies avaliable"
             })
         }
 
         await books.updateOne(
-            {_id: new ObjectId(bookId)},
+            { _id: new ObjectId(bookId) },
             {
-                $inc : {
-                    availableCopies : -1
+                $inc: {
+                    availableCopies: -1
                 }
             }
         )
 
-        const result = await borrows.insertOne(req.body) 
+        const result = await borrows.insertOne(req.body)
         res.status(201).send({
-            message : "Borrow book successfully"
+            message: "Borrow book successfully"
         })
 
-    } catch(error){
+    } catch (error) {
         console.dir(error)
         res.status(500).send({
             message: "Failed to borrow book"
@@ -159,16 +162,16 @@ app.post('/borrows',async(req,res)=>{
 
 // Get borrow book
 
-app.get('/borrows',async(req,res)=>{
-    try{
+app.get('/borrows', async (req, res) => {
+    try {
         const userEmail = req.query.userEmail as string
         const allBorrows = await borrows.find({
-            userEmail : userEmail
+            userEmail: userEmail
         }).toArray()
-        
+
         res.send(allBorrows)
 
-    } catch(error){
+    } catch (error) {
         console.dir(error)
         res.status(500).send({
             message: "Failed to fetch borrow records"
@@ -178,120 +181,121 @@ app.get('/borrows',async(req,res)=>{
 
 //Return borrow book
 
-app.delete('/borrows/:id',async(req,res)=>{
-    try{
+app.delete('/borrows/:id', async (req, res) => {
+    try {
         const id = req.params.id
 
-        if(!ObjectId.isValid(id)){
+        if (!ObjectId.isValid(id)) {
             return res.status(400).send({
-                message : "Invalid borrow ID"
+                message: "Invalid borrow ID"
             })
         }
         const borrow = await borrows.findOne({
-            _id : new ObjectId(id)
+            _id: new ObjectId(id)
         })
 
-        if(!borrow){
+        if (!borrow) {
             return res.status(404).send({
-                message : "Borrow record not found"
+                message: "Borrow record not found"
             })
         }
 
-        
+
         const bookId = new ObjectId(borrow.bookId)
-        const availableCopies = await books.updateOne({ _id : bookId},{ 
-            $inc :{availableCopies : 1
+        const availableCopies = await books.updateOne({ _id: bookId }, {
+            $inc: {
+                availableCopies: 1
 
             }
         })
 
-       
-        if(availableCopies.matchedCount === 0){
+
+        if (availableCopies.matchedCount === 0) {
             return res.status(404).send({
-                message : "Book not found"
+                message: "Book not found"
             })
         }
 
-         await borrows.deleteOne({
-            _id : new ObjectId(id)
+        await borrows.deleteOne({
+            _id: new ObjectId(id)
         })
         res.send({
-            message : "Book returned successfully"
+            message: "Book returned successfully"
         })
 
-    } catch(error){
+    } catch (error) {
         console.dir(error)
         res.status(500).send({
-            message : "Failed to return borrow book"
+            message: "Failed to return borrow book"
         })
     }
 })
 
 //Update book
 
-    app.patch('/books/:id',async(req,res)=>{
-        try{
-            const id = req.params.id
-            
-            if(!ObjectId.isValid(id)){
-                return res.status(400).send({
-                    message : "Invalid book ID"
-                })
-            }
+app.patch('/books/:id', async (req, res) => {
+    try {
+        const id = req.params.id
 
-            const bookId = new ObjectId(id)
-
-            const result = await books.updateOne(
-                {_id: bookId},{ $set: req.body}
-            )
-
-            if(result.matchedCount === 0){
-                return res.status(404).send({
-                    message : "Book not found"
-                })
-            }
-            res.send({
-                message : "Book updated successfully",result
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).send({
+                message: "Invalid book ID"
             })
-        } catch(error){
-            console.dir(error);
-            res.status(500).send("Failed to update book")
         }
-        
-    })
+
+        const bookId = new ObjectId(id)
+
+        const result = await books.updateOne(
+            { _id: bookId }, { $set: req.body }
+        )
+
+        if (result.matchedCount === 0) {
+            return res.status(404).send({
+                message: "Book not found"
+            })
+        }
+        res.send({
+            message: "Book updated successfully", result
+        })
+    } catch (error) {
+        console.dir(error);
+        res.status(500).send("Failed to update book")
+    }
+
+})
 
 //Delete book
 
-    app.delete('/books/:id',async(req,res)=>{
-        try{
-            const id = req.params.id
-            
-            if(!ObjectId.isValid(id)){
-                return res.status(400).send({
-                    message : "Invalid book ID"
-                })         
-            }
-            const bookId = new ObjectId(id)
-                const result = await books.deleteOne({_id: bookId})
-                if(result.deletedCount === 0){
-                return res.status(404).send({
-                    message : "Book not found"
-                })
-            }
-            res.status(200).send({
-                message : "Book deleted successfully",result
-            })
+app.delete('/books/:id', async (req, res) => {
+    try {
+        const id = req.params.id
 
-        } catch(error){
-            console.dir(error);
-            res.status(500).send("Failed to delete book")
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).send({
+                message: "Invalid book ID"
+            })
         }
-    })
+        const bookId = new ObjectId(id)
+        const result = await books.deleteOne({ _id: bookId })
+        if (result.deletedCount === 0) {
+            return res.status(404).send({
+                message: "Book not found"
+            })
+        }
+        res.status(200).send({
+            message: "Book deleted successfully", result
+        })
+
+    } catch (error) {
+        console.dir(error);
+        res.status(500).send("Failed to delete book")
+    }
+})
 
 //Start BookNook server
 
 const authContext = await auth.$context;
 
-app.listen(port,()=>{
+app.listen(port, () => {
     console.log(`BookNook server is running on port ${port}`);
 })
