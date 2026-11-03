@@ -8,9 +8,9 @@ console.log("Google Client Secret loaded:", !!process.env.GOOGLE_CLIENT_SECRET);
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
   trustedOrigins: [
-    "http://localhost:3000",
-    "http://localhost:5000"
-  ],
+  "http://localhost:3000",
+  "https://booknook-client-new.vercel.app",
+],
   database: mongodbAdapter(db),
   emailAndPassword: {
     enabled: true,

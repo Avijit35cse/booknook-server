@@ -11,9 +11,12 @@ const port = process.env.PORT || 5000
 
 //middlewares
 app.use(cors({
-    origin: "http://localhost:3000",
+    origin: [
+        "http://localhost:3000",
+        "https://booknook-client-new.vercel.app",
+    ],
     credentials: true,
-}))
+}));
 app.all("/api/auth/*splat", toNodeHandler(auth));
 app.use(express.json())
 
