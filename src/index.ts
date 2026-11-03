@@ -294,8 +294,9 @@ app.delete('/books/:id', async (req, res) => {
 
 //Start BookNook server
 
-const authContext = await auth.$context;
+// const authContext = await auth.$context;
 
-app.listen(port, () => {
-    console.log(`BookNook server is running on port ${port}`);
-})
+// app.listen(port, () => {
+//     console.log(`BookNook server is running on port ${port}`);
+// })
+export default app;
