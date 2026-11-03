@@ -32,15 +32,14 @@ app.get('/', (req, res) => {
     res.send("BookNook server is running!")
 })
 
-//Get books by user email
-
+// Get all books or filter by user email
 app.get('/books', async (req, res) => {
     try {
-        const addedBy = req.query.addedBy as string;
+        const addedBy = req.query.addedBy as string | undefined;
 
-        const allBooks = await books.find({
-            addedBy: addedBy
-        }).toArray();
+        const query = addedBy ? { addedBy } : {};
+
+        const allBooks = await books.find(query).toArray();
 
         res.send(allBooks);
     } catch (error) {
@@ -50,6 +49,26 @@ app.get('/books', async (req, res) => {
         });
     }
 });
+
+// Get latest 6 books
+app.get('/books/latest', async (req, res) => {
+    try {
+        const latestBooks = await books
+            .find({})
+            .sort({ createdAt: -1 })
+            .limit(6)
+            .toArray();
+
+        res.send(latestBooks);
+    } catch (error) {
+        console.dir(error);
+        res.status(500).send({
+            message: "Failed to fetch latest books"
+        });
+    }
+});
+
+
 
 //Single book api
 
@@ -86,7 +105,11 @@ app.get('/books/:id', async (req, res) => {
 app.post('/books', async (req, res) => {
 
     try {
-        const result = await books.insertOne(req.body)
+        const bookData = {
+            ...req.body,
+            createdAt: new Date()
+        };
+        const result = await books.insertOne(bookData)
         res.status(201).send({
             message: "Book added successfully",
             result

@@ -1,26 +1,38 @@
-import {betterAuth} from 'better-auth'
+import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
-import { db } from './db.js';
+import { db } from "./db.js";
 
 console.log("Google Client ID loaded:", !!process.env.GOOGLE_CLIENT_ID);
 console.log("Google Client Secret loaded:", !!process.env.GOOGLE_CLIENT_SECRET);
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
+
   trustedOrigins: [
-  "http://localhost:3000",
-  "https://booknook-client-new.vercel.app",
-],
+    "http://localhost:3000",
+    "https://booknook-client-new.vercel.app",
+  ],
+
   database: mongodbAdapter(db),
+
   emailAndPassword: {
     enabled: true,
     autoSignIn: false,
     minPasswordLength: 6,
   },
+
   socialProviders: {
     google: {
-        clientId: process.env.GOOGLE_CLIENT_ID!,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     },
-},
+  },
+
+  // Cookie configuration
+  advanced: {
+    defaultCookieAttributes: {
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+    },
+  },
 });
