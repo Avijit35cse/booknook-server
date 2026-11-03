@@ -1,13 +1,13 @@
-import { MongoClient } from "mongodb";
-import "dotenv/config";
+    import { MongoClient } from "mongodb";
+    import "dotenv/config";
 
-//MongoDB connection
+    //MongoDB connection
 
-const client = new MongoClient(process.env.MONGODB_URI!);
+    const client = new MongoClient(process.env.MONGODB_URI!);
 
-await client.connect();
+    await client.connect();
 
-console.log("You successfully connected to MongoDB!");
+    console.log("You successfully connected to MongoDB!");
 
-// Select BookNook database
-export const db = client.db("booknookDB");
+    // Select BookNook database
+    export const db = client.db("booknookDB");
