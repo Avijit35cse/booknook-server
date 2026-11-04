@@ -102,6 +102,58 @@ app.get('/books/:id', async (req, res) => {
 // Add book
 app.post('/books', async (req, res) => {
     try {
+        const {
+            title,
+            author,
+            category,
+            image,
+            description,
+            totalCopies
+        } = req.body;
+
+        // Validate required fields
+        if (
+            typeof title !== "string" ||
+            !title.trim() ||
+            typeof author !== "string" ||
+            !author.trim() ||
+            typeof category !== "string" ||
+            !category.trim() ||
+            typeof image !== "string" ||
+            !image.trim() ||
+            typeof description !== "string" ||
+            !description.trim()
+        ) {
+            return res.status(400).send({
+                message: "Please provide all required book information."
+            });
+        }
+
+        // Validate category
+        const allowedCategories = [
+            "Fiction",
+            "Science",
+            "History",
+            "Kids",
+            "Others"
+        ];
+
+        if (!allowedCategories.includes(category)) {
+            return res.status(400).send({
+                message: "Please select a valid book category."
+            });
+        }
+
+        // Validate total copies
+        if (
+            !Number.isInteger(totalCopies) ||
+            totalCopies < 1
+        ) {
+            return res.status(400).send({
+                message: "Total copies must be a positive integer."
+            });
+        }
+
         const bookData = {
             ...req.body,
             createdAt: new Date()
@@ -113,10 +165,12 @@ app.post('/books', async (req, res) => {
             message: "Book added successfully",
             result
         });
+
     } catch (error) {
-        console.dir(error);
+        console.error("Add book error:", error);
+
         res.status(500).send({
-            message: "Failed to add book"
+            message: "Failed to add book. Please try again."
         });
     }
 });
