@@ -2,6 +2,7 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { db } from "./db.js";
+import { jwt } from "better-auth/plugins";
 
 console.log("Google Client ID loaded:", !!process.env.GOOGLE_CLIENT_ID);
 console.log("Google Client Secret loaded:", !!process.env.GOOGLE_CLIENT_SECRET);
@@ -35,4 +36,5 @@ export const auth = betterAuth({
             secure: process.env.NODE_ENV === "production",
         },
     },
+    plugins: [jwt()],
 });
